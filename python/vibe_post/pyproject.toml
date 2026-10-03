@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vibe-post"
+version = "1.0.0"
+description = "VIBE-Model 后处理、诊断、检验与绘图工具包"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "VIBE-Model Team" }]
+keywords = ["numerical weather prediction", "post-processing", "verification", "diagnostics"]
+classifiers = [
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Atmospheric Science",
+]
+dependencies = ["numpy>=1.23"]
+
+[project.optional-dependencies]
+netcdf = ["xarray>=2023.1", "netCDF4>=1.6"]
+grib = ["cfgrib>=0.9.10", "eccodes>=1.6"]
+plots = ["matplotlib>=3.6"]
+yaml = ["PyYAML>=6.0"]
+all = [
+  "xarray>=2023.1", "netCDF4>=1.6",
+  "cfgrib>=0.9.10", "eccodes>=1.6",
+  "matplotlib>=3.6", "PyYAML>=6.0",
+]
+test = ["pytest>=7.0"]
+
+[project.scripts]
+vibe-post = "vibe_post.cli:main"
+
+[project.urls]
+Documentation = "https://example.invalid/vibe-model/docs/design/10_postprocessing.md"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]
