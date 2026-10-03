@@ -1,0 +1,16 @@
+# =============================================================================
+#  config/physics.yaml —— 物理参数化配置（叠加在 model.yaml 之上）
+# =============================================================================
+
+physics:
+  microphysics: thompson       # 六类双参数微物理（云水/雨/云冰/雪/霰）
+  radiation: rrtmg_full        # 长波 + 短波，相关 k 分布
+  pbl: myj                     # Mellor-Yamada 2.5 阶 TKE 闭合
+  surface: noah                # 五层土壤
+  cumulus: kf                  # Kain-Fritsch 质量通量
+  radiation_cadence: 600
+  use_cloud_fraction: true
+  co2_ppm: 420
+  aerosol_optical_depth: 0.15
+  soil_layers: 5
+  enable_tendency_physics: true

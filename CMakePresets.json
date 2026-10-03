@@ -1,0 +1,79 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 20, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "gcc-release",
+      "displayName": "GCC Release (MPI + OpenMP + NetCDF)",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build/gcc-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_CXX_COMPILER": "g++",
+        "CMAKE_C_COMPILER": "gcc",
+        "VIBE_ENABLE_MPI": "ON",
+        "VIBE_ENABLE_OPENMP": "ON",
+        "VIBE_ENABLE_NETCDF": "ON",
+        "VIBE_PRECISION": "double",
+        "VIBE_BUILD_TESTS": "ON"
+      }
+    },
+    {
+      "name": "mixed-precision",
+      "displayName": "Release with mixed precision (FP64 state / FP32 compute)",
+      "inherits": "gcc-release",
+      "binaryDir": "${sourceDir}/build/mixed",
+      "cacheVariables": { "VIBE_PRECISION": "mixed" }
+    },
+    {
+      "name": "cuda-release",
+      "displayName": "CUDA Release (sm_80)",
+      "inherits": "gcc-release",
+      "binaryDir": "${sourceDir}/build/cuda-release",
+      "cacheVariables": {
+        "VIBE_ENABLE_CUDA": "ON",
+        "VIBE_ENABLE_NETCDF": "OFF",
+        "VIBE_GPU_ARCH": "80"
+      }
+    },
+    {
+      "name": "hip-release",
+      "displayName": "HIP Release",
+      "inherits": "gcc-release",
+      "binaryDir": "${sourceDir}/build/hip-release",
+      "cacheVariables": { "VIBE_ENABLE_HIP": "ON", "VIBE_ENABLE_CUDA": "OFF", "VIBE_ENABLE_NETCDF": "OFF" }
+    },
+    {
+      "name": "debug-asan",
+      "displayName": "Debug with sanitizers (no MPI)",
+      "inherits": "gcc-release",
+      "binaryDir": "${sourceDir}/build/debug-asan",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "VIBE_ENABLE_MPI": "OFF",
+        "VIBE_ENABLE_NETCDF": "OFF",
+        "VIBE_ENABLE_SANITIZERS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "gcc-release", "configurePreset": "gcc-release", "jobs": 8 },
+    { "name": "mixed-precision", "configurePreset": "mixed-precision", "jobs": 8 },
+    { "name": "cuda-release", "configurePreset": "cuda-release", "jobs": 8 },
+    { "name": "debug-asan", "configurePreset": "debug-asan", "jobs": 8 }
+  ],
+  "testPresets": [
+    {
+      "name": "gcc-release",
+      "configurePreset": "gcc-release",
+      "output": { "outputOnFailure": true },
+      "execution": { "jobs": 4, "timeout": 300 }
+    },
+    {
+      "name": "debug-asan",
+      "configurePreset": "debug-asan",
+      "output": { "outputOnFailure": true },
+      "execution": { "jobs": 1, "timeout": 600 }
+    }
+  ]
+}

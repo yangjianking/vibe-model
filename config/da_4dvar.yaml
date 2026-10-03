@@ -1,0 +1,49 @@
+# =============================================================================
+#  config/da_4dvar.yaml —— 增量 4D-Var 同化配置
+# =============================================================================
+
+enabled: true
+
+window:
+  start: "2000-01-01T00:00:00Z"
+  length: 21600        # 6 小时窗口 (s)
+  slot_interval: 12    # 观测时隙数（每 30 分钟一个）
+
+background:
+  method: nmc                  # nmc | ensemble | hybrid
+  balance: linear_balance      # none | linear_balance | omega
+  horizontal_length_scale: 200000
+  vertical_length_scale: 3000
+  diffusion_order: 2.0
+  variance_scale: 1.0
+  n_eofs: 10
+  vertical_eof_fractions: [0.35, 0.20, 0.12, 0.08, 0.06]
+  hybrid_weight: 0.5
+  ensemble_dir: ""
+
+cost:
+  use_penalty: true
+  penalty_weight: 1.0e-4
+  use_digital_filter: true
+  digital_filter_weight: 1.0e-5
+  use_model_error: false
+  model_error_scale: 0.0
+  use_weak_constraint: false
+
+minimizer:
+  method: lbfgs            # lbfgs | cg | lanczos
+  max_iterations: 50
+  gradient_tolerance: 1.0e-6
+  cost_tolerance: 1.0e-8
+  memory: 10
+  initial_step: 0.1
+  preconditioned: true
+
+outer_loops: 2
+inner_loops: 50
+inner_resolution_factor: 2.0
+assimilate_moisture: true
+use_tl_ad: true
+obs_list: "obs/example_obs.csv"
+bias_correction: variational_1d
+check_adjoint: true          # 启动时做伴随点积检验

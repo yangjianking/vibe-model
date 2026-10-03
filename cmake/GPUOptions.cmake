@@ -1,0 +1,66 @@
+# =============================================================================
+#  cmake/GPUOptions.cmake —— GPU 后端的探测与启用
+#
+#  设计目标：同一套源码在 CPU / CUDA / HIP / SYCL 四种后端下编译，
+#  业务代码只调用 vibe::gpu 的抽象（见 include/vibe/gpu/）。
+# =============================================================================
+
+set(VIBE_GPU_BACKEND "cpu" CACHE STRING "实际启用的 GPU 后端")
+add_library(vibe_gpu_backend INTERFACE)
+
+if(VIBE_ENABLE_CUDA AND VIBE_ENABLE_HIP)
+  message(FATAL_ERROR "VIBE: CUDA 与 HIP 不能同时启用")
+endif()
+
+if(VIBE_ENABLE_CUDA)
+  include(CheckLanguage)
+  check_language(CUDA)
+  if(CMAKE_CUDA_COMPILER)
+    enable_language(CUDA)
+    set(VIBE_GPU_BACKEND "cuda")
+    set(CMAKE_CUDA_STANDARD 17)
+    set(CMAKE_CUDA_STANDARD_REQUIRED ON)
+    target_compile_definitions(vibe_gpu_backend INTERFACE VIBE_HAVE_CUDA=1 VIBE_BACKEND_CUDA=1)
+
+    if(VIBE_GPU_ARCH)
+      set(CMAKE_CUDA_ARCHITECTURES ${VIBE_GPU_ARCH})
+    else()
+      set(CMAKE_CUDA_ARCHITECTURES "native")
+    endif()
+
+    find_package(CUDAToolkit QUIET)
+    if(CUDAToolkit_FOUND)
+      target_link_libraries(vibe_gpu_backend INTERFACE CUDA::cudart)
+    endif()
+    message(STATUS "VIBE: CUDA 后端已启用，架构=${CMAKE_CUDA_ARCHITECTURES}")
+  else()
+    message(WARNING "VIBE: 未找到 CUDA 编译器，VIBE_ENABLE_CUDA 自动关闭")
+    set(VIBE_ENABLE_CUDA OFF)
+  endif()
+elseif(VIBE_ENABLE_HIP)
+  find_package(hip QUIET)
+  if(hip_FOUND)
+    set(VIBE_GPU_BACKEND "hip")
+    target_compile_definitions(vibe_gpu_backend INTERFACE VIBE_HAVE_HIP=1 VIBE_BACKEND_HIP=1)
+    target_link_libraries(vibe_gpu_backend INTERFACE hip::host)
+    message(STATUS "VIBE: HIP 后端已启用")
+  else()
+    message(WARNING "VIBE: 未找到 HIP，VIBE_ENABLE_HIP 自动关闭")
+    set(VIBE_ENABLE_HIP OFF)
+  endif()
+elseif(VIBE_ENABLE_SYCL)
+  find_package(IntelSYCL QUIET)
+  if(IntelSYCL_FOUND)
+    set(VIBE_GPU_BACKEND "sycl")
+    target_compile_definitions(vibe_gpu_backend INTERFACE VIBE_HAVE_SYCL=1 VIBE_BACKEND_SYCL=1)
+    target_link_libraries(vibe_gpu_backend INTERFACE IntelSYCL::SYCL_CXX)
+    message(STATUS "VIBE: SYCL 后端已启用")
+  else()
+    message(WARNING "VIBE: 未找到 SYCL，VIBE_ENABLE_SYCL 自动关闭")
+    set(VIBE_ENABLE_SYCL OFF)
+  endif()
+endif()
+
+if(VIBE_GPU_BACKEND STREQUAL "cpu")
+  target_compile_definitions(vibe_gpu_backend INTERFACE VIBE_BACKEND_CPU=1)
+endif()

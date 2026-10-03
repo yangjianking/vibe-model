@@ -1,0 +1,93 @@
+# =============================================================================
+#  config/model.yaml —— VIBE-Model 主运行配置
+#
+#  所有字段都可省略，省略时使用 C++ 侧的默认值（见 include/vibe/config/config.hpp）。
+#  多个文件可以用 `ModelConfig::load(paths)` 依次叠加，后者覆盖前者。
+# =============================================================================
+
+name: vibe_idealized
+description: "理想试验：二维/三维干对流（暖泡），用于验证动力学核心与时间推进"
+
+# ------------------------------- 计算域 -------------------------------------
+domain:
+  nx: 128              # x 方向内部点数
+  ny: 64               # y 方向内部点数
+  nz: 60               # 垂直层数
+  dx: 2000             # x 分辨率 (m)
+  dy: 2000             # y 分辨率 (m)
+  x0: 0
+  y0: 0
+  z_top: 22000         # 模式顶 (m)
+  terrain: ""          # 地形文件；空 = 平坦（mountain_wave 会自动生成 Agnesi 山）
+  # 垂直层：不写则用 zeta_first_thickness/zeta_stretch 自动生成几何拉伸层
+  zeta_first_thickness: 60
+  zeta_stretch: 1.055
+  # zeta: [0.0, 0.002, ...]        # 也可以直接给出 nz+1 个层界面坐标
+  variable_resolution: false      # 变分辨率网格（见 config/variable_resolution.yaml）
+  h_min: 1000
+  h_max: 15000
+  refinement: none                # none | circular | channel
+  refinement_cx: 0
+  refinement_cy: 0
+  refinement_radius: 0
+  refinement_transition: 0
+  periodic_x: true                # 理想试验用周期边界
+  periodic_y: true
+
+# ------------------------------- 时间步 -------------------------------------
+time:
+  dt: 6                # 大时间步 (s)
+  run_length: 7200     # 总模拟时长 (s)
+  acoustic_substeps: 6 # 声波子步数
+  integrator: rk3_acoustic   # rk3_acoustic | semi_implicit
+  cfl_target: 0.8
+  adaptive_dt: false
+  output_interval: 900
+  restart_interval: 0
+  start_time: "2000-01-01T00:00:00Z"
+
+# ------------------------------- 数值格式 -----------------------------------
+numerics:
+  advection: central2       # central2 | central4 | central6 | weno5 | upwind3
+  flux_form: true
+  divergence_damping: 0.0
+  divergence_order: 2
+  sponge_alpha: 0.2
+  sponge_start_fraction: 0.8
+  helmholtz_solver: krylov_multigrid   # vertical_tridiagonal | krylov_jacobi | krylov_multigrid
+  helmholtz_max_iter: 200
+  helmholtz_tol: 1.0e-8
+  weno: false
+  coriolis: fplane          # none | fplane | betaplane
+  fplane_latitude: 45.0
+
+# ------------------------------- 嵌套 ---------------------------------------
+nesting:
+  enabled: false
+  levels: 0
+  ratio: 3
+  two_way: true
+  boundary_zone: 5
+  feedback_interval: 0
+
+# ------------------------------- 物理 ---------------------------------------
+physics:
+  microphysics: kessler         # none | kessler | thompson | morrison
+  radiation: rrtmg_simple       # none | rrtmg_simple | rrtmg_full
+  pbl: ysu                      # none | ysu | myj
+  surface: monin_obukhov        # none | monin_obukhov | noah
+  cumulus: none                 # none | kf | grell
+  radiation_cadence: 900
+  use_cloud_fraction: true
+  co2_ppm: 420
+  aerosol_optical_depth: 0.1
+  soil_layers: 5
+  enable_tendency_physics: true
+
+# ------------------------------- 并行与输出 ---------------------------------
+parallel:
+  px: 1
+  py: 1
+  io_backend: netcdf     # netcdf | binary
+  output_dir: output
+  write_double: true

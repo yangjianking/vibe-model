@@ -1,0 +1,33 @@
+# =============================================================================
+#  config/nests.yaml —— 嵌套层级配置（叠加在 model.yaml 之上）
+# =============================================================================
+
+nesting:
+  enabled: true
+  levels: 2
+  ratio: 3
+  two_way: true
+  boundary_zone: 5
+  feedback_interval: 0        # 0 = 每个父步都反馈
+  child_domains:
+    - d02
+    - d03
+
+# 各子域的覆盖范围与松弛参数（供 driver 扩展使用）
+child_domains:
+  d02:
+    i0: 0
+    j0: 0
+    iext: 96
+    jext: 96
+    ratio: 3
+    boundary_zone: 5
+    two_way: true
+  d03:
+    i0: 0
+    j0: 0
+    iext: 108
+    jext: 108
+    ratio: 3
+    boundary_zone: 5
+    two_way: true

@@ -1,0 +1,40 @@
+# =============================================================================
+#  config/variable_resolution.yaml —— 平滑变分辨率网格配置
+#
+#  在中心区域加密到 1 km，向边界光滑过渡到 15 km。
+#  映射构造见 include/vibe/grid/variable_resolution.hpp（[N5][N6]）。
+# =============================================================================
+
+name: vibe_varres
+description: "变分辨率网格：中心加密区 1 km，边界 15 km"
+
+domain:
+  nx: 180
+  ny: 180
+  nz: 64
+  dx: 1000            # 名义分辨率（变分辨率下被 dx_cell 覆盖）
+  dy: 1000
+  z_top: 24000
+  variable_resolution: true
+  refinement: circular
+  h_min: 1000
+  h_max: 15000
+  refinement_cx: 90000
+  refinement_cy: 90000
+  refinement_radius: 40000
+  refinement_transition: 60000
+  periodic_x: false
+  periodic_y: false
+
+time:
+  dt: 3
+  run_length: 43200
+  acoustic_substeps: 8
+  integrator: rk3_acoustic
+  cfl_target: 0.7
+
+numerics:
+  advection: weno5
+  weno: true
+  helmholtz_solver: krylov_multigrid
+  sponge_alpha: 0.3
